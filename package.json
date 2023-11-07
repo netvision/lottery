@@ -15,8 +15,10 @@
     "@vueuse/core": "^10.1.2",
     "axios": "^1.5.0",
     "firebase": "^10.3.0",
-    "flowbite": "^1.8.1",
-    "flowbite-vue": "0.0.17-next.13",
+    "flowbite": "^2.0.0",
+    "flowbite-vue": "^0.1.0",
+    "moment-timezone": "^0.5.43",
+    "ntp-client": "^0.5.3",
     "pinia": "^2.1.6",
     "vue": "^3.3.4",
     "vue-router": "^4.2.2"
