@@ -13,7 +13,7 @@ const currentSlot = ref({})
 const newBid = ref({})
 const slotsOptions = ref([])
 
-axios.get('http://worldtimeapi.org/api/timezone/Asia/Kolkata').then((r) => {
+axios.get('https://worldtimeapi.org/api/timezone/Asia/Kolkata').then((r) => {
   currentTime.value = new Date(r.data.datetime)
 })
 
@@ -21,7 +21,7 @@ const isShowModal = ref(false)
 
 const showModal = () => {
   isShowModal.value = true
-  axios.get('http://worldtimeapi.org/api/timezone/Asia/Kolkata').then((r) => {
+  axios.get('https://worldtimeapi.org/api/timezone/Asia/Kolkata').then((r) => {
   currentTime.value = new Date(r.data.datetime)
 })
 }
