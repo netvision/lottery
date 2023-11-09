@@ -12,6 +12,7 @@
     "postinstall": "npx simple-git-hooks"
   },
   "dependencies": {
+    "@vuepic/vue-datepicker": "^7.2.2",
     "@vueuse/core": "^10.1.2",
     "axios": "^1.5.0",
     "firebase": "^10.3.0",

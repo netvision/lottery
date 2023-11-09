@@ -7,9 +7,7 @@
     &copy; <a
       icon-btn
       rel="noreferrer"
-      href="https://rkjkbarasia.com/"
-      target="_blank"
-      title="RKJK Barasia College"
-    >My Lottery</a>
+      href="#"
+    >Super Laxmi</a>
   </nav>
 </template>

@@ -26,7 +26,7 @@ onAuthStateChanged(auth, (user) => {
   <header v-if="authStore.isLoggedIn">
     <nav class="flex items-center justify-between bg-white px-20 py-10">
       <h1 class="text-xl font-bold text-gray-800">
-        <a href="/">My Lottery</a>
+        <a href="/">Super Laxmi</a>
       </h1>
       <div class="flex items-center">
         <img :src="authStore.photoURL" class="w-10 rounded-xl"> &nbsp; &nbsp; &nbsp;
