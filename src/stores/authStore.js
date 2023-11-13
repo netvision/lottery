@@ -18,7 +18,7 @@ export const useAuthStore = defineStore('auth', {
       const auth = getAuth()
       signInWithEmailAndPassword(auth, email, password).then((result) => {
         const user = result.user
-        this.$router.push('/')
+        this.$router.push('/admin')
       }).catch((error) => {
         const errorCode = error.code
         this.errorMessage = error.message
@@ -31,7 +31,7 @@ export const useAuthStore = defineStore('auth', {
       signOut(auth)
         .then(() => {
           alert('logged out')
-          this.$router.push('/login')
+          this.$router.push('/')
         })
         .catch((error) => {
           const errorCode = error.code

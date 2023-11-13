@@ -31,7 +31,7 @@ onMounted(() => {
 
 <template>
   <div>
-    <p class="mr-5 text-right">
+    <p class="bg-slate-200 py-5 text-center">
       {{ ntpTime.toUpperCase() }}
     </p>
   </div>
