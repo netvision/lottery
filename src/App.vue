@@ -54,10 +54,10 @@ onAuthStateChanged(auth, (user) => {
       &copy; <a
         icon-btn
         rel="noreferrer"
-        href="https://rkjkbarasia.com/"
+        href="https://superlaxmiwin.com/"
         target="_blank"
-        title="RKJK Barasia College"
-      >Lottery</a>
+        title="Super Laxmi"
+      >Super Laxmi</a>
     </div>
   </footer>
 </template>
