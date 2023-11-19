@@ -29,9 +29,38 @@ const getDayData = async () => {
     })
 }
 
+const intervals = ref([])
+
+const schedules = () => {
+  slots.value.forEach((slot) => {
+    const hours = slot.result_time.split(':')[0]
+    const scheduleTime = new Date()
+    // eslint-disable-next-line no-restricted-globals
+    scheduleTime.setHours(parseInt(hours, 10))
+    scheduleTime.setMinutes(0)
+    scheduleTime.setSeconds(15)
+    const currentTime = new Date()
+    const timeDiff = scheduleTime.getTime() - currentTime.getTime()
+    if (timeDiff > 0) {
+      const timeOutId = setTimeout(async () => {
+        await getDayData()
+      }, timeDiff)
+      intervals.value.push(timeOutId)
+    }
+  })
+}
+
 onMounted(async () => {
   slots.value = await axios.get('https://lotteryapi.netserve.in/slots').then(r => r.data)
   await getDayData()
+  schedules()
+})
+
+onBeforeUnmount(() => {
+  intervals.value.forEach((id) => {
+    clearInterval(id)
+    clearTimeout(id)
+  })
 })
 </script>
 
