@@ -23,27 +23,19 @@ onAuthStateChanged(auth, (user) => {
 </script>
 
 <template class="min-h-screen flex flex-col">
-  <header v-if="authStore.isLoggedIn">
-    <nav class="flex items-center justify-between bg-white px-20 py-10">
-      <h1 class="text-xl font-bold text-gray-800">
-        <a href="/admin">Super Laxmi</a>
-      </h1>
-      <div class="flex items-center">
-        <img :src="authStore.photoURL" class="w-10 rounded-xl"> &nbsp; &nbsp; &nbsp;
-        <button class="rounded-md bg-blue-500 px-2 py-1 text-white" @click="authStore.signout">
-          Logout
-        </button>
+  <header>
+    <nav class="flex bg-yellow-100 px-20 py-3 align-bottom">
+      <div>
+        <img src="laxmi-logo.png" class="h-32 border border-2 border-blue-400 p-2">
+      </div>
+      <div class="self-end pl-5">
+        <h1 class="text-3xl font-bold tracking-widest text-rose-600">
+          <a href="/">SUPER<br>LAXMI</a>
+        </h1>
       </div>
     </nav>
   </header>
-  <header v-else>
-    <nav class="flex items-center justify-between bg-white px-20 py-10">
-      <h1 class="text-xl font-bold text-gray-800">
-        <a href="/">Super Laxmi</a>
-      </h1>
-    </nav>
-  </header>
-  <main class="flex-grow">
+  <main class="custom-bg flex-grow">
     <RouterView />
   </main>
   <footer class="fixed bottom-0 w-full bg-gray-800 p-4 text-white">
@@ -58,3 +50,11 @@ onAuthStateChanged(auth, (user) => {
     </div>
   </footer>
 </template>
+
+<style type="text/css">
+  .custom-bg{
+    background-image: url('superlaxmilogo.png');
+    background-size: cover;
+    background-position: center;
+  }
+</style>

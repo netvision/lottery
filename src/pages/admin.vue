@@ -143,7 +143,7 @@ onBeforeUnmount(() => {
             </div>
             <div v-else>
               <p class="block w-3/4 border border-gray-300 rounded-lg bg-gray-50 p-4 ps-24 text-sm text-gray-900 dark:border-gray-600 focus:border-blue-500 dark:bg-gray-700 dark:text-white focus:ring-blue-500 dark:focus:border-blue-500 dark:focus:ring-blue-500 dark:placeholder-gray-400">
-                {{ slot.winning_no ?? 'Wait...' }}
+                {{ slot.winning_no?.toString().padStart(2, '0') ?? 'Wait...' }}
               </p>
             </div>
           </div>
