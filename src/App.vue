@@ -50,11 +50,3 @@ onAuthStateChanged(auth, (user) => {
     </div>
   </footer>
 </template>
-
-<style type="text/css">
-  .custom-bg{
-    background-image: url('superlaxmilogo.png');
-    background-size: cover;
-    background-position: center;
-  }
-</style>
