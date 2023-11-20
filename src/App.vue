@@ -26,7 +26,7 @@ onAuthStateChanged(auth, (user) => {
   <header>
     <nav class="flex bg-yellow-100 px-20 py-3 align-bottom">
       <div>
-        <img src="laxmi-logo.png" class="h-32 border border-2 border-blue-400 p-2">
+        <img src="logo.png" class="h-32 border-2 border-blue-400 p-2">
       </div>
       <div class="self-end pl-5">
         <h1 class="text-3xl font-bold tracking-widest text-rose-600">
