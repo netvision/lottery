@@ -28,7 +28,7 @@ onAuthStateChanged(auth, (user) => {
   <header>
     <nav class="flex justify-center bg-yellow-200 px-20 py-3 align-bottom">
       <div>
-        <img src="logo.gif" class="h-60 border-2 border-blue-400 p-2">
+        <img src="logo.png" class="h-60 border-2 border-blue-400 p-2">
       </div>
       <div class="self-end pl-5">
         <h1 class="[text-shadow:_0_2px_0_rgb(0_0_0_/_40%)] font-serif text-3xl font-bold tracking-widest text-rose-600">
