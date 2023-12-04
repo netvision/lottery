@@ -66,11 +66,11 @@ onBeforeUnmount(() => {
 
 <template class="min-h-screen">
   <NtpClock />
-  <div class="grid grid-cols-1 md:grid-cols-4">
-    <div class="bg-gray-100 p-4 md:col-span-1">
-      <VueDatePicker v-model="date" auto-apply inline :max-date="new Date()" :enable-time-picker="false" format="dd-MM-yyyy" @update:model-value="getDayData" />
+  <div class="grid grid-cols-1 bg-blue-700 text-slate-50 md:grid-cols-4">
+    <div class="p-4 md:col-span-1">
+      <VueDatePicker v-model="date" menu-class-name="dp-custom-menu" calendar-class-name="calendar" auto-apply inline :max-date="new Date()" :enable-time-picker="false" format="dd-MM-yyyy" @update:model-value="getDayData" />
     </div>
-    <div class="bg-blue-50 p-4 md:col-span-3">
+    <div class="p-4 md:col-span-3">
       <div class="mx-5 text-left">
         {{ date.toDateString() }}
       </div>
@@ -80,13 +80,13 @@ onBeforeUnmount(() => {
         </h1>
         <div v-for="slot in slots" :key="slot.id">
           <div v-if="ifFuture(slot.result_time)" class="relative py-3">
-            <div class="pointer-events-none absolute start-0 inset-y-0 flex items-center ps-3">
+            <div class="pointer-events-none absolute start-0 inset-y-0 flex items-center ps-3 font-bold text-blue-900">
               Slot {{ slot.title }}
               <br>
               {{ formatTime(slot.result_time) }}
             </div>
             <div class="block w-3/4 border border-gray-300 rounded-lg bg-gray-50 p-4 ps-24 text-2xl text-gray-900 dark:border-gray-600 focus:border-blue-500 dark:bg-gray-700 dark:text-white focus:ring-blue-500 dark:focus:border-blue-500 dark:focus:ring-blue-500 dark:placeholder-gray-400">
-              <span class="m-2 border border-blue-200 bg-green-400 p-2 text-red-600">{{ slot.winning_no.toString().padStart(2, '0') }}</span>
+              <span class="m-2 border rounded-2xl bg-green-400 p-2 font-sans font-bold text-red-600 shadow-md">{{ slot.winning_no.toString().padStart(2, '0') }}</span>
             </div>
           </div>
         </div>
@@ -94,3 +94,14 @@ onBeforeUnmount(() => {
     </div>
   </div>
 </template>
+
+<style>
+.dp-custom-menu {
+  box-shadow: 0 0 6px #1976d2;
+  background-color: rgb(221, 110, 59);
+  font-weight: bold;
+}
+.calendar{
+  font-style: italic;
+}
+</style>

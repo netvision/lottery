@@ -30,9 +30,23 @@ onMounted(() => {
 </script>
 
 <template>
-  <div>
-    <p class="bg-slate-200 p-3 text-right">
-      {{ ntpTime.toUpperCase() }}
-    </p>
+  <div class="w-full overflow-x-hidden bg-red-900">
+    <div class="marquee w-full whitespace-nowrap py-3 font-bold text-white">
+      <span>{{ ntpTime.toUpperCase() }}</span>
+    </div>
   </div>
 </template>
+
+<style>
+  .marquee {
+    animation: marquee 15s linear infinite;
+  }
+  @keyframes marquee {
+  from {
+    transform: translateX(0%);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+</style>

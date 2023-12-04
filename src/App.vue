@@ -1,7 +1,8 @@
 <script setup>
 import { getAuth, onAuthStateChanged } from 'firebase/auth'
 import { useAuthStore } from './stores/authStore'
-import logo from './assets/logo.png'
+
+// import logo from './assets/logo.gif'
 
 const authStore = useAuthStore()
 const auth = getAuth()
@@ -25,18 +26,18 @@ onAuthStateChanged(auth, (user) => {
 
 <template class="min-h-screen flex flex-col">
   <header>
-    <nav class="flex bg-yellow-100 px-20 py-3 align-bottom">
+    <nav class="flex justify-center bg-yellow-200 px-20 py-3 align-bottom">
       <div>
-        <img :src="logo" class="h-32 border-2 border-blue-400 p-2">
+        <img src="logo.gif" class="h-60 border-2 border-blue-400 p-2">
       </div>
       <div class="self-end pl-5">
-        <h1 class="text-3xl font-bold tracking-widest text-rose-600">
-          <a href="/">SUPER<br>LAXMI</a>
+        <h1 class="[text-shadow:_0_2px_0_rgb(0_0_0_/_40%)] font-serif text-3xl font-bold tracking-widest text-rose-600">
+          <a href="/">SUPER<br>LAXMI<br>WIN</a>
         </h1>
       </div>
     </nav>
   </header>
-  <main class="custom-bg flex-grow">
+  <main class="flex-grow">
     <RouterView />
   </main>
   <footer class="fixed bottom-0 w-full bg-gray-800 p-4 text-white">
@@ -46,8 +47,8 @@ onAuthStateChanged(auth, (user) => {
         rel="noreferrer"
         href="https://superlaxmiwin.com/"
         target="_blank"
-        title="Super Laxmi"
-      >Super Laxmi</a>
+        title="Super Laxmi Win"
+      >Super Laxmi Win</a>
     </div>
   </footer>
 </template>
