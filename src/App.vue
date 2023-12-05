@@ -1,7 +1,9 @@
+<!-- eslint-disable vue/html-self-closing -->
 <script setup>
 import { getAuth, onAuthStateChanged } from 'firebase/auth'
 import { useAuthStore } from './stores/authStore'
 import logo from '~/assets/logo.png'
+import blaast from '~/assets/blaast.gif'
 
 const authStore = useAuthStore()
 const auth = getAuth()
@@ -40,6 +42,9 @@ onAuthStateChanged(auth, (user) => {
     <RouterView />
   </main>
   <footer class="fixed bottom-0 w-full bg-gray-800 p-4 text-white">
+    <div class="mx-auto text-center">
+      <img :src="blaast" class="mx-auto w-24">
+    </div>
     <div class="mx-auto text-center container">
       &copy; <a
         icon-btn
