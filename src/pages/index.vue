@@ -64,7 +64,7 @@ onBeforeUnmount(() => {
 })
 </script>
 
-<template class="min-h-screen">
+<template class="min-h-screen pb-10">
   <NtpClock />
   <div class="grid grid-cols-1 bg-blue-700 text-slate-50 md:grid-cols-4">
     <div class="p-4 md:col-span-1">
@@ -85,7 +85,7 @@ onBeforeUnmount(() => {
               <br>
               {{ formatTime(slot.result_time) }}
             </div>
-            <div class="block w-3/4 border border-gray-300 rounded-lg bg-gray-50 p-4 ps-24 text-2xl text-gray-900 dark:border-gray-600 focus:border-blue-500 dark:bg-gray-700 dark:text-white focus:ring-blue-500 dark:focus:border-blue-500 dark:focus:ring-blue-500 dark:placeholder-gray-400">
+            <div class="block w-3/4 border border-gray-300 rounded-lg bg-gray-50 p-4 ps-24 text-2xl text-gray-900 focus:border-blue-500 focus:ring-blue-500">
               <span class="m-2 border rounded-2xl bg-green-400 p-2 font-sans font-bold text-red-600 shadow-md">{{ slot.winning_no.toString().padStart(2, '0') }}</span>
             </div>
           </div>

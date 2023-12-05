@@ -38,7 +38,7 @@ onAuthStateChanged(auth, (user) => {
       </div>
     </nav>
   </header>
-  <main class="flex-grow">
+  <main class="mb-15 flex-grow pb-15">
     <RouterView />
   </main>
   <footer class="fixed bottom-0 w-full bg-gray-800 p-4 text-white">
