@@ -106,7 +106,7 @@ onBeforeUnmount(() => {
           Results
         </h1>
         <div v-for="slot in slots" :key="slot.id">
-          <div v-if="slot.winning_no !== 'NA'" class="relative py-3">
+          <div v-if="ifFuture(slot.result_time) > 0" class="relative py-3">
             <div class="pointer-events-none absolute start-0 inset-y-0 flex items-center ps-3 font-bold text-blue-900">
               Slot {{ slot.title }}
               <br>

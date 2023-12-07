@@ -27,7 +27,9 @@ const timeDiff = (rTime) => {
 
 const autoSave = (slot) => {
   if (isValidValue(slot.winning_no)) {
-    let dt = `${date.value.getFullYear()}-${date.value.getMonth() + 1}-${date.value.getDate().toString().padStart(2, '0')}`
+    let curDate = new Date()
+    let dt = `${curDate.getFullYear()}-${curDate.getMonth() + 1}-${curDate.getDate().toString().padStart(2, '0')}`
+    console.log(dt)
     let newRes = {
       date: dt,
       time: slot.result_time,
@@ -76,7 +78,6 @@ const getDayData = async () => {
     sl.canEdit = (timeDiff(sl.result_time) < 0 && timeDiff(sl.result_time) > -(60 * 60 * 1000)) ? 'enabled' : 'disabled'
     return sl
   })
-  console.log(new Date())
 }
 
 const intervals = ref([])
