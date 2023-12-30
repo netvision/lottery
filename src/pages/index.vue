@@ -69,6 +69,14 @@ const schedules = () => {
 }
 */
 
+function isLastDayOfMonth(date) {
+  const currentMonth = date.getMonth()
+  const nextDay = new Date(date)
+  nextDay.setDate(date.getDate() + 1)
+
+  return nextDay.getMonth() !== currentMonth
+}
+
 onMounted(async () => {
   slots.value = await axios.get('https://lotteryapi.netserve.in/slots').then(r => r.data)
   /*
@@ -97,8 +105,8 @@ onBeforeUnmount(() => {
     <div class="p-4 md:col-span-1">
       <img :src="logo" class="m-auto w-auto justify-center">
     </div>
-    <div class="p-4 md:col-span-2">
-      <div v-if="date" class="mx-5 text-left">
+    <div v-if="date && !isLastDayOfMonth(date)" class="p-4 md:col-span-2">
+      <div class="mx-5 text-left">
         {{ date?.toDateString() }}
       </div>
       <div class="mb-12">
@@ -119,10 +127,18 @@ onBeforeUnmount(() => {
         </div>
         <div v-if="upcoming" class="relative py-3">
           <div class="block w-3/4 border border-gray-300 rounded-lg bg-gray-50 p-4 ps-24 text-2xl text-gray-900 focus:border-blue-500 focus:ring-blue-500">
-            <span class="m-2 text-sm">Next slot in<br></span><span class="m-2 text-lg">{{ upTime }}</span>
+            <span class="m-2 text-sm">Next result in<br></span><span class="m-2 text-lg">{{ upTime }}</span>
           </div>
         </div>
       </div>
+    </div>
+    <div v-else>
+      <div class="mx-5 text-left">
+        {{ date?.toDateString() }}
+      </div>
+      <h2 class="mx-4 mt-6 text-xl">
+        Last day of the Month
+      </h2>
     </div>
   </div>
 </template>
