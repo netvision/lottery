@@ -1,3 +1,4 @@
+<!-- eslint-disable no-unmodified-loop-condition -->
 <!-- eslint-disable no-restricted-globals -->
 <!-- eslint-disable prefer-const -->
 <!-- eslint-disable no-console -->
@@ -12,13 +13,51 @@ const date = ref(new Date())
 const results = ref([])
 const slots = ref([])
 
+const timeArray = () => {
+  const startTime = new Date()
+  startTime.setHours(8, 0, 0, 0) // Set start time to 8:00 AM
+
+  const endTime = new Date()
+  endTime.setHours(20, 0, 0, 0) // Set end time to 8:00 PM
+
+  const timeArray = []
+  let currentTime = new Date(startTime)
+  let n = 1
+  while (currentTime <= endTime) {
+    const formattedTime = currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+    timeArray.push({ result_time: formattedTime, id: n })
+    currentTime.setMinutes(currentTime.getMinutes() + 20)
+    n = n + 1
+  }
+  return timeArray
+}
+
+function formatTime(mysqlTime) {
+  // Assuming mysqlTime is in the format 'HH:MM:SS'
+  const [hours, minutes] = mysqlTime.split(':')
+
+  // Create a Date object with the time values
+  const dateObj = new Date()
+  dateObj.setHours(hours, minutes, 0, 0)
+
+  // Format the time using toLocaleTimeString
+  const formattedTime = dateObj.toLocaleTimeString('en-US', {
+    hour: 'numeric',
+    minute: 'numeric',
+    hour12: true,
+  })
+
+  return formattedTime
+}
+
 const isValidValue = value => value != null && value !== '' && !isNaN(value) && value >= 0 && value <= 99
 
 const timeDiff = (rTime) => {
   const hour = rTime.split(':')[0]
+  const min = rTime.split(':')[1]
   const refDate = date.value
   refDate.setHours(parseInt(hour, 10))
-  refDate.setMinutes(0)
+  refDate.setMinutes(parseInt(min, 10))
   refDate.setSeconds(0)
   const curDate = new Date()
   const diff = curDate.getTime() - refDate.getTime()
@@ -28,7 +67,7 @@ const timeDiff = (rTime) => {
 const autoSave = (slot) => {
   if (isValidValue(slot.winning_no)) {
     let curDate = new Date()
-    let dt = `${curDate.getFullYear()}-${curDate.getMonth() + 1}-${curDate.getDate().toString().padStart(2, '0')}`
+    let dt = `${curDate.getFullYear()}-${(curDate.getMonth() + 1).toString().padStart(2, '0')}-${curDate.getDate().toString().padStart(2, '0')}`
     console.log(dt)
     let newRes = {
       date: dt,
@@ -72,12 +111,14 @@ const getDayData = async () => {
   // eslint-disable-next-line prefer-const
   let dt = `${date.value.getFullYear()}-${date.value.getMonth() + 1}-${date.value.getDate().toString().padStart(2, '0')}`
   results.value = await axios.get(`https://lotteryapi.netserve.in/results?filter[date][eq]=${dt}`).then(r => r.data)
+  console.log(results.value?.filter(rs => rs.time === '09:00:00')[0])
   slots.value.map((sl) => {
-    sl.winning_no = results.value?.filter(rs => rs.slot_id === sl.id)[0]?.winning_no ?? null
-    sl.res_id = results.value?.filter(rs => rs.slot_id === sl.id)[0]?.id ?? null
-    sl.canEdit = (timeDiff(sl.result_time) < 0 && timeDiff(sl.result_time) > -(60 * 60 * 1000)) ? 'enabled' : 'disabled'
+    sl.winning_no = results.value?.filter(rs => rs.time === sl.result_time)[0]?.winning_no ?? null
+    sl.res_id = results.value?.filter(rs => rs.time === sl.result_time)[0]?.id ?? null
+    sl.canEdit = (timeDiff(sl.result_time) < 0 && timeDiff(sl.result_time) > -(20 * 60 * 1000)) ? 'enabled' : 'disabled'
     return sl
   })
+  console.log(slots.value)
 }
 
 const intervals = ref([])
@@ -85,9 +126,10 @@ const intervals = ref([])
 const schedules = () => {
   slots.value.forEach((slot) => {
     const hours = slot.result_time.split(':')[0]
+    const min = slot.result_time.split(':')[1]
     const scheduleTime = new Date()
     scheduleTime.setHours(parseInt(hours, 10))
-    scheduleTime.setMinutes(0)
+    scheduleTime.setMinutes(parseInt(min, 10))
     scheduleTime.setSeconds(15)
     const currentTime = new Date()
     const timeDiff = scheduleTime.getTime() - currentTime.getTime()
@@ -101,7 +143,9 @@ const schedules = () => {
 }
 
 onMounted(async () => {
-  slots.value = await axios.get('https://lotteryapi.netserve.in/slots').then(r => r.data)
+  // slots.value = await axios.get('https://lotteryapi.netserve.in/slots').then(r => r.data)
+  slots.value = timeArray()
+  slots.value.push({ result_time: '22:00:00', id: 38 })
   await getDayData()
   schedules()
 })
@@ -131,7 +175,8 @@ onBeforeUnmount(() => {
         <div v-for="slot in slots" :key="slot.id">
           <div class="relative py-3">
             <div class="pointer-events-none absolute start-0 inset-y-0 flex items-center ps-3">
-              Slot {{ slot.title }}
+              Slot {{ slot.id }} <br>
+              {{ formatTime(slot.result_time) }}
             </div>
             <div v-if="slot.canEdit === 'enabled'">
               <input v-model="slot.winning_no" class="block w-3/4 border border-gray-300 rounded-lg bg-gray-50 p-4 ps-24 text-sm text-gray-900 dark:border-gray-600 focus:border-blue-500 dark:bg-gray-700 dark:text-white focus:ring-blue-500 dark:focus:border-blue-500 dark:focus:ring-blue-500 dark:placeholder-gray-400" placeholder="update winning no." @blur="autoSave(slot)">
