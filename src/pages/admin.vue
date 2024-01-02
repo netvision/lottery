@@ -24,13 +24,18 @@ const timeArray = () => {
   let currentTime = new Date(startTime)
   let n = 1
   while (currentTime <= endTime) {
-    const formattedTime = currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
-    timeArray.push({ result_time: formattedTime, id: n })
+    const hours = currentTime.getHours().toString().padStart(2, '0')
+    const minutes = currentTime.getMinutes().toString().padStart(2, '0')
+    const seconds = currentTime.getSeconds().toString().padStart(2, '0')
+    const timeString = `${hours}:${minutes}:${seconds}`
+    timeArray.push({ result_time: timeString, id: n })
     currentTime.setMinutes(currentTime.getMinutes() + 20)
     n = n + 1
   }
   return timeArray
 }
+
+console.log(timeArray())
 
 function formatTime(mysqlTime) {
   // Assuming mysqlTime is in the format 'HH:MM:SS'
