@@ -19,7 +19,7 @@ const upTime = ref()
 const formatTime = (mysqlTime, userLocale = navigator.language || 'en-US') => moment(mysqlTime, 'HH:mm:ss').locale(userLocale).format('LT')
 const ifFuture = (rtime) => {
   let dt = `${date.value.getFullYear()}-${(date.value.getMonth() + 1).toString().padStart(2, '0')}-${date.value.getDate().toString().padStart(2, '0')}`
-  return Number.parseInt(moment().diff(moment(`${dt}T${rtime}`), 'second'))
+  return Number.parseInt(moment().diff(moment(`${dt}T${rtime}`, 'YYYY-MM-DDTHH:mm:ss'), 'second'))
 }
 
 const timeArray = () => {
