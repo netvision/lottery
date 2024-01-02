@@ -21,7 +21,6 @@ const ifFuture = (rtime) => {
   let dt = `${date.value.getFullYear()}-${(date.value.getMonth() + 1).toString().padStart(2, '0')}-${date.value.getDate().toString().padStart(2, '0')}`
   return Number.parseInt(moment().diff(moment(`${dt}T${rtime}`, 'YYYY-MM-DDTHH:mm:ss'), 'second'))
 }
-
 const timeArray = () => {
   const startTime = new Date()
   startTime.setHours(8, 0, 0, 0) // Set start time to 8:00 AM
@@ -33,8 +32,11 @@ const timeArray = () => {
   let currentTime = new Date(startTime)
   let n = 1
   while (currentTime <= endTime) {
-    const formattedTime = currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
-    timeArray.push({ result_time: formattedTime, id: n })
+    const hours = currentTime.getHours().toString().padStart(2, '0')
+    const minutes = currentTime.getMinutes().toString().padStart(2, '0')
+    const seconds = currentTime.getSeconds().toString().padStart(2, '0')
+    const timeString = `${hours}:${minutes}:${seconds}`
+    timeArray.push({ result_time: timeString, id: n })
     currentTime.setMinutes(currentTime.getMinutes() + 20)
     n = n + 1
   }
@@ -72,7 +74,6 @@ const getDayData = async () => {
       sl.winning_no = results.value?.filter(rs => rs.time === sl.result_time)[0]?.winning_no ?? 'NA'
       return sl
     })
-  console.log(upcoming.value)
 }
 
 const intervals = ref([])
