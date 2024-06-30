@@ -7,6 +7,7 @@
 import VueDatePicker from '@vuepic/vue-datepicker'
 import '@vuepic/vue-datepicker/dist/main.css'
 import axios from 'axios'
+import CryptoJS from 'crypto-js'
 
 const date = ref(new Date())
 
@@ -34,8 +35,6 @@ const timeArray = () => {
   }
   return timeArray
 }
-
-console.log(timeArray())
 
 function formatTime(mysqlTime) {
   // Assuming mysqlTime is in the format 'HH:MM:SS'
@@ -81,7 +80,7 @@ const autoSave = (slot) => {
       winning_no: slot.winning_no,
     }
     if (slot.res_id) {
-      axios.put(`https://lotteryapi.netserve.in/results/${slot.res_id}`, newRes).then((r) => {
+      axios.put(`https://superlaxmi.netserve.in/results/${slot.res_id}`, newRes).then((r) => {
         if (r.status === 200) {
           slot.status = 'success'
           slot.message = 'Saved successfully'
@@ -93,7 +92,7 @@ const autoSave = (slot) => {
       })
     }
     else {
-      axios.post('https://lotteryapi.netserve.in/results', newRes).then((r) => {
+      axios.post('https://superlaxmi.netserve.in/results', newRes).then((r) => {
         if (r.status === 201) {
           slot.status = 'success'
           slot.message = 'Saved successfully'
@@ -115,15 +114,16 @@ const autoSave = (slot) => {
 const getDayData = async () => {
   // eslint-disable-next-line prefer-const
   let dt = `${date.value.getFullYear()}-${date.value.getMonth() + 1}-${date.value.getDate().toString().padStart(2, '0')}`
-  results.value = await axios.get(`https://lotteryapi.netserve.in/results?filter[date][eq]=${dt}`).then(r => r.data)
-  console.log(results.value?.filter(rs => rs.time === '09:00:00')[0])
+  let data = await axios.get(`https://superlaxmi.netserve.in/results?filter[date][eq]=${dt}`).then(r => r.data)
+  let decodedData = atob(data)
+  results.value = CryptoJS.AES.decrypt(decodedData, 'guessme').toString(CryptoJS.enc.Utf8)
+  console.log(results.value)
   slots.value.map((sl) => {
     sl.winning_no = results.value?.filter(rs => rs.time === sl.result_time)[0]?.winning_no ?? null
     sl.res_id = results.value?.filter(rs => rs.time === sl.result_time)[0]?.id ?? null
     sl.canEdit = (timeDiff(sl.result_time) < 0 && timeDiff(sl.result_time) > -(20 * 60 * 1000)) ? 'enabled' : 'disabled'
     return sl
   })
-  console.log(slots.value)
 }
 
 const intervals = ref([])
@@ -148,10 +148,10 @@ const schedules = () => {
 }
 
 onMounted(async () => {
-  // slots.value = await axios.get('https://lotteryapi.netserve.in/slots').then(r => r.data)
+  // slots.value = await axios.get('https://superlaxmi.netserve.in/slots').then(r => r.data)
   slots.value = timeArray()
   slots.value.push({ result_time: '22:00:00', id: 38 })
-  await getDayData()
+  // await getDayData()
   schedules()
 })
 

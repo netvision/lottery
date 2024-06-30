@@ -68,7 +68,7 @@ const getDayData = async () => {
   curTime.setHours(0)
   curTime.setMinutes(0)
   curTime.setSeconds(0)
-  results.value = await axios.get(`https://lotteryapi.netserve.in/results?filter[date][eq]=${dt}`).then(r => r.data)
+  results.value = await axios.get(`https://superlaxmi.netserve.in/results?filter[date][eq]=${dt}`).then(r => r.data)
   slots.value
     .map((sl) => {
       sl.winning_no = results.value?.filter(rs => rs.time === sl.result_time)[0]?.winning_no ?? 'NA'
@@ -117,7 +117,7 @@ function isLastDayOfMonth(date) {
 }
 
 onMounted(async () => {
-  // slots.value = await axios.get('https://lotteryapi.netserve.in/slots').then(r => r.data)
+  // slots.value = await axios.get('https://superlaxmi.netserve.in/slots').then(r => r.data)
   /*
   slots.value = (new Date() > date) ? data.filter(d => ifFuture(d.result_time) > 0) : data
   upcoming.value = data.filter(d => ifFuture(d.result_time) < 0)[0]

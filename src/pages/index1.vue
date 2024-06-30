@@ -46,12 +46,12 @@ const reset = () => {
 }
 
 const getBids = async (date) => {
-  let bids = await axios.get(`https://lotteryapi.netserve.in/bids?filter[date][eq]=${date}`).then(r => r.data)
+  let bids = await axios.get(`https://superlaxmi.netserve.in/bids?filter[date][eq]=${date}`).then(r => r.data)
   return bids
 }
 
 const getResults = async (date) => {
-  let results = await axios.get(`https://lotteryapi.netserve.in/results?filter[date][eq]=${date}`).then(r => r.data)
+  let results = await axios.get(`https://superlaxmi.netserve.in/results?filter[date][eq]=${date}`).then(r => r.data)
   return results
 }
 
@@ -148,7 +148,7 @@ const saveBid = async () => {
   /*
   newBid.value.date = `${currentTime.value.getFullYear()}-${currentTime.value.getMonth() + 1}-${currentTime.value.getDate().toString().padStart(2, '0')}`
   newBid.value.time = `${currentTime.value.getHours().toString().padStart(2, '0')}:${currentTime.value.getMinutes().toString().padStart(2, '0')}:${currentTime.value.getSeconds().toString().padStart(2, '0')}`
-  let res = await axios.post('https://lotteryapi.netserve.in/bids', newBid.value)
+  let res = await axios.post('https://superlaxmi.netserve.in/bids', newBid.value)
   if (res.status === 201) {
     newBid.value = {}
     getDayData(currentTime.value)
@@ -173,7 +173,7 @@ const showBidsModal = (v) => {
 
 onMounted(async () => {
   numbers.value = Array.from({ length: 99 }, (_, i) => (i + 1).toString().padStart(2, '0'))
-  slots.value = await axios.get('https://lotteryapi.netserve.in/slots').then(r => r.data)
+  slots.value = await axios.get('https://superlaxmi.netserve.in/slots').then(r => r.data)
   currentSlot.value = slots.value[0]
   await getDayData(currentTime.value)
   /*
