@@ -7,7 +7,6 @@
 import VueDatePicker from '@vuepic/vue-datepicker'
 import '@vuepic/vue-datepicker/dist/main.css'
 import axios from 'axios'
-import CryptoJS from 'crypto-js'
 
 const date = ref(new Date())
 
@@ -114,9 +113,7 @@ const autoSave = (slot) => {
 const getDayData = async () => {
   // eslint-disable-next-line prefer-const
   let dt = `${date.value.getFullYear()}-${date.value.getMonth() + 1}-${date.value.getDate().toString().padStart(2, '0')}`
-  let data = await axios.get(`https://superlaxmi.netserve.in/results?filter[date][eq]=${dt}`).then(r => r.data)
-  let decodedData = atob(data)
-  results.value = CryptoJS.AES.decrypt(decodedData, 'guessme').toString(CryptoJS.enc.Utf8)
+  results.value = await axios.get(`https://superlaxmi.netserve.in/results?filter[date][eq]=${dt}`).then(r => r.data)
   console.log(results.value)
   slots.value.map((sl) => {
     sl.winning_no = results.value?.filter(rs => rs.time === sl.result_time)[0]?.winning_no ?? null
@@ -151,7 +148,7 @@ onMounted(async () => {
   // slots.value = await axios.get('https://superlaxmi.netserve.in/slots').then(r => r.data)
   slots.value = timeArray()
   slots.value.push({ result_time: '22:00:00', id: 38 })
-  // await getDayData()
+  await getDayData()
   schedules()
 })
 
