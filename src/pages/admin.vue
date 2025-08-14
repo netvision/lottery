@@ -7,6 +7,7 @@
 import VueDatePicker from '@vuepic/vue-datepicker'
 import '@vuepic/vue-datepicker/dist/main.css'
 import axios from 'axios'
+import protectedAPI from '~/utils/api'
 
 const date = ref(new Date())
 
@@ -79,7 +80,7 @@ const autoSave = (slot) => {
       winning_no: slot.winning_no,
     }
     if (slot.res_id) {
-      axios.put(`https://superlaxmi.netserve.in/results/${slot.res_id}`, newRes).then((r) => {
+      protectedAPI.put(`/results/${slot.res_id}`, newRes).then((r) => {
         if (r.status === 200) {
           slot.status = 'success'
           slot.message = 'Saved successfully'
@@ -91,7 +92,7 @@ const autoSave = (slot) => {
       })
     }
     else {
-      axios.post('https://superlaxmi.netserve.in/results', newRes).then((r) => {
+      protectedAPI.post('/results', newRes).then((r) => {
         if (r.status === 201) {
           slot.status = 'success'
           slot.message = 'Saved successfully'

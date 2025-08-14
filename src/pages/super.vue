@@ -1,6 +1,6 @@
 <!-- eslint-disable no-console -->
 <script setup>
-import axios from 'axios'
+import collegeProtectedAPI from '~/utils/collegeApi'
 import { useAuthStore } from '~/stores/authStore'
 
 const authStore = useAuthStore()
@@ -63,7 +63,7 @@ function save() {
     const data = { ...row, sr_no: 'NA', permanent_address: 'NA' }
     console.log(data)
     promises.push(
-      axios.post('https://collegeapi.netserve.in/students', data)
+      collegeProtectedAPI.post('/students', data)
         .then((res) => {
           ids.value.push(res.data.id)
         })

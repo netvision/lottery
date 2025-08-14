@@ -4,6 +4,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import routes from 'virtual:generated-pages'
 import { initializeApp } from 'firebase/app'
 import { getAuth, onAuthStateChanged } from 'firebase/auth'
+import { useAuthStore } from './stores/authStore'
 import App from './App.vue'
 
 import '@unocss/reset/tailwind.css'
@@ -54,10 +55,19 @@ router.beforeEach(async (to, from, next) => {
     next()
   }
 })
-app.use(router)
+
+app.use(pinia)
 pinia.use(({ store }) => {
   store.$router = markRaw(router)
 })
-app.use(pinia)
 
+// Initialize auth state listener after Pinia is set up
+const auth = getAuth()
+const authStore = useAuthStore()
+
+onAuthStateChanged(auth, (user) => {
+  authStore.setUser(user)
+})
+
+app.use(router)
 app.mount('#app')

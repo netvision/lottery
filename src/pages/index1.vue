@@ -148,7 +148,7 @@ const saveBid = async () => {
   /*
   newBid.value.date = `${currentTime.value.getFullYear()}-${currentTime.value.getMonth() + 1}-${currentTime.value.getDate().toString().padStart(2, '0')}`
   newBid.value.time = `${currentTime.value.getHours().toString().padStart(2, '0')}:${currentTime.value.getMinutes().toString().padStart(2, '0')}:${currentTime.value.getSeconds().toString().padStart(2, '0')}`
-  let res = await axios.post('https://superlaxmi.netserve.in/bids', newBid.value)
+  let res = await protectedAPI.post('/bids', newBid.value)
   if (res.status === 201) {
     newBid.value = {}
     getDayData(currentTime.value)
