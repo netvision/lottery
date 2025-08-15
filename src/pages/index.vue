@@ -1,201 +1,196 @@
+<!-- eslint-disable no-unmodified-loop-condition -->
+<!-- eslint-disable prefer-const -->
+<!-- eslint-disable no-console -->
+<!-- eslint-disable vue/html-self-closing -->
+<!-- eslint-disable antfu/top-level-function -->
 <script setup>
-import { onMounted, ref } from 'vue'
+import moment from 'moment'
+import VueDatePicker from '@vuepic/vue-datepicker'
+import '@vuepic/vue-datepicker/dist/main.css'
+import axios from 'axios'
 import logo from '~/assets/laxmiji.gif'
 
-// Countdown to Monday, August 18th, 2025
-const targetDate = new Date('2025-08-18T00:00:00')
-const timeLeft = ref({
-  days: 0,
-  hours: 0,
-  minutes: 0,
-  seconds: 0,
-})
+const date = ref(new Date())
+const results = ref([])
+const slots = ref([])
+const upcoming = ref({})
+const upTime = ref()
 
-function updateCountdown() {
-  const now = new Date()
-  const difference = targetDate.getTime() - now.getTime()
+const formatTime = (mysqlTime, userLocale = navigator.language || 'en-US') => moment(mysqlTime, 'HH:mm:ss').locale(userLocale).format('LT')
+const ifFuture = (rtime) => {
+  let dt = `${date.value.getFullYear()}-${(date.value.getMonth() + 1).toString().padStart(2, '0')}-${date.value.getDate().toString().padStart(2, '0')}`
+  return Number.parseInt(moment().diff(moment(`${dt}T${rtime}`, 'YYYY-MM-DDTHH:mm:ss'), 'second'))
+}
+const timeArray = () => {
+  const startTime = new Date()
+  startTime.setHours(8, 0, 0, 0) // Set start time to 8:00 AM
 
-  if (difference > 0) {
-    timeLeft.value = {
-      days: Math.floor(difference / (1000 * 60 * 60 * 24)),
-      hours: Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
-      minutes: Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60)),
-      seconds: Math.floor((difference % (1000 * 60)) / 1000),
-    }
+  const endTime = new Date()
+  endTime.setHours(20, 0, 0, 0) // Set end time to 8:00 PM
+
+  const timeArray = []
+  let currentTime = new Date(startTime)
+  let n = 1
+  while (currentTime <= endTime) {
+    const hours = currentTime.getHours().toString().padStart(2, '0')
+    const minutes = currentTime.getMinutes().toString().padStart(2, '0')
+    const seconds = currentTime.getSeconds().toString().padStart(2, '0')
+    const timeString = `${hours}:${minutes}:${seconds}`
+    timeArray.push({ result_time: timeString, id: n })
+    currentTime.setMinutes(currentTime.getMinutes() + 20)
+    n = n + 1
   }
-  else {
-    timeLeft.value = { days: 0, hours: 0, minutes: 0, seconds: 0 }
-  }
+  return timeArray
 }
 
-onMounted(() => {
-  updateCountdown()
-  setInterval(updateCountdown, 1000)
+function mysqlTime(mysqlTime) {
+  // Assuming mysqlTime is in the format 'HH:MM:SS'
+  const [hours, minutes] = mysqlTime.split(':')
+
+  // Create a Date object with the time values
+  const dateObj = new Date()
+  dateObj.setHours(hours, minutes, 0, 0)
+
+  // Format the time using toLocaleTimeString
+  const formattedTime = dateObj.toLocaleTimeString('en-US', {
+    hour: 'numeric',
+    minute: 'numeric',
+    hour12: true,
+  })
+
+  return formattedTime
+}
+
+const getDayData = async () => {
+  upcoming.value = slots.value.find(sl => ifFuture(sl.result_time) < 0)
+  let dt = `${date.value.getFullYear()}-${(date.value.getMonth() + 1).toString().padStart(2, '0')}-${date.value.getDate().toString().padStart(2, '0')}`
+  let curTime = new Date()
+  curTime.setHours(0)
+  curTime.setMinutes(0)
+  curTime.setSeconds(0)
+  results.value = await axios.get(`https://superlaxmi.netserve.in/results?filter[date][eq]=${dt}`).then(r => r.data)
+  slots.value
+    .map((sl) => {
+      sl.winning_no = results.value?.filter(rs => rs.time === sl.result_time)[0]?.winning_no ?? 'NA'
+      return sl
+    })
+}
+
+const intervals = ref([])
+
+const intId = setInterval(() => {
+  if (upcoming.value?.result_time) {
+    let t = Math.abs(ifFuture(upcoming.value.result_time)) ?? 0
+    upTime.value = moment.utc(t * 1000).format('HH:mm:ss')
+    if (t > 0)
+      t--
+    else location.reload()
+  }
+}, 1000)
+/*
+const schedules = () => {
+  slots.value.forEach((slot) => {
+    const hours = slot.result_time.split(':')[0]
+    const scheduleTime = new Date()
+    // eslint-disable-next-line no-restricted-globals
+    scheduleTime.setHours(parseInt(hours, 10))
+    scheduleTime.setMinutes(0)
+    scheduleTime.setSeconds(15)
+    const currentTime = new Date()
+    const timeDiff = scheduleTime.getTime() - currentTime.getTime()
+    if (timeDiff > 0) {
+      const timeOutId = setTimeout(async () => {
+        await getDayData()
+      }, timeDiff)
+      intervals.value.push(timeOutId)
+    }
+  })
+}
+*/
+
+function isLastDayOfMonth(date) {
+  const currentMonth = date.getMonth()
+  const nextDay = new Date(date)
+  nextDay.setDate(date.getDate() + 1)
+
+  return nextDay.getMonth() !== currentMonth
+}
+
+onMounted(async () => {
+  // slots.value = await axios.get('https://superlaxmi.netserve.in/slots').then(r => r.data)
+  /*
+  slots.value = (new Date() > date) ? data.filter(d => ifFuture(d.result_time) > 0) : data
+  upcoming.value = data.filter(d => ifFuture(d.result_time) < 0)[0]
+  */
+  slots.value = timeArray()
+  slots.value.push({ result_time: '22:00:00', id: 38 })
+  await getDayData()
+  // schedules()
+})
+
+onBeforeUnmount(() => {
+  intervals.value.forEach((id) => {
+    clearInterval(id)
+    clearTimeout(id)
+  })
+  clearInterval(intId)
 })
 </script>
 
-<template>
-  <div class="min-h-screen flex flex-col from-yellow-50 via-orange-50 to-red-50 bg-gradient-to-br">
-    <!-- Header -->
-    <header class="bg-yellow-200 shadow-md">
-      <nav class="flex justify-center py-6">
-        <div class="flex items-center">
-          <img :src="logo" class="h-24 w-auto border-2 border-blue-400 rounded-lg bg-white p-2 shadow-lg">
-        </div>
-      </nav>
-    </header>
-
-    <!-- Main Content -->
-    <main class="flex flex-1 items-center justify-center px-4 py-12">
-      <div class="mx-auto max-w-4xl text-center">
-        <!-- Maintenance Icon -->
-        <div class="mb-8">
-          <div class="mb-4 h-24 w-24 inline-flex items-center justify-center rounded-full bg-yellow-100">
-            <svg class="h-12 w-12 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 7.172V5L8 4z" />
-            </svg>
-          </div>
-        </div>
-
-        <!-- Main Heading -->
-        <h1 class="mb-6 text-4xl font-bold text-gray-800 md:text-6xl">
-          Website Under
-          <span class="text-yellow-600">Maintenance</span>
+<template class="min-h-screen pb-10">
+  <NtpClock />
+  <div class="grid grid-cols-1 bg-blue-700 text-slate-50 md:grid-cols-4">
+    <div class="p-4 md:col-span-1">
+      <VueDatePicker v-model="date" menu-class-name="dp-custom-menu" calendar-class-name="calendar" auto-apply inline :max-date="new Date()" :enable-time-picker="false" format="dd-MM-yyyy" @update:model-value="getDayData" />
+    </div>
+    <div class="p-4 md:col-span-1">
+      <img :src="logo" class="m-auto w-auto justify-center">
+    </div>
+    <div v-if="date && !isLastDayOfMonth(date)" class="p-4 md:col-span-2">
+      <div class="mx-5 text-left">
+        {{ date?.toDateString() }}
+      </div>
+      <div class="mb-12">
+        <h1 class="mx-5 mb-6 text-xl underline underline-offset-4 underline-solid">
+          Results
         </h1>
-
-        <!-- Description -->
-        <p class="mx-auto mb-8 max-w-3xl text-xl leading-relaxed text-gray-600 md:text-2xl">
-          We're working hard to improve your experience. Our lottery system will be back online with enhanced security and new features.
-        </p>
-
-        <!-- Launch Date -->
-        <div class="mb-8 border border-yellow-200 rounded-2xl bg-white p-8 shadow-xl">
-          <h2 class="mb-4 text-2xl font-semibold text-gray-800 md:text-3xl">
-            🚀 Launching on
-          </h2>
-          <div class="mb-6 text-3xl font-bold text-yellow-600 md:text-4xl">
-            Monday, August 18th, 2025
-          </div>
-
-          <!-- Countdown Timer -->
-          <div class="grid grid-cols-2 mx-auto max-w-md gap-4 md:grid-cols-4">
-            <div class="rounded-xl from-yellow-400 to-orange-400 bg-gradient-to-br p-4 text-white">
-              <div class="text-2xl font-bold md:text-3xl">
-                {{ timeLeft.days }}
-              </div>
-              <div class="text-sm tracking-wide uppercase">
-                Days
-              </div>
+        <div v-for="slot in slots" :key="slot.id">
+          <div v-if="ifFuture(slot.result_time) > 0 && slot?.winning_no !== 'NA'" class="relative py-3">
+            <div class="pointer-events-none absolute start-0 inset-y-0 flex items-center ps-3 font-bold text-blue-900">
+              Slot {{ slot.id }}
+              <br>
+              {{ mysqlTime(slot.result_time) }}
             </div>
-            <div class="rounded-xl from-orange-400 to-red-400 bg-gradient-to-br p-4 text-white">
-              <div class="text-2xl font-bold md:text-3xl">
-                {{ timeLeft.hours }}
-              </div>
-              <div class="text-sm tracking-wide uppercase">
-                Hours
-              </div>
-            </div>
-            <div class="rounded-xl from-red-400 to-pink-400 bg-gradient-to-br p-4 text-white">
-              <div class="text-2xl font-bold md:text-3xl">
-                {{ timeLeft.minutes }}
-              </div>
-              <div class="text-sm tracking-wide uppercase">
-                Minutes
-              </div>
-            </div>
-            <div class="rounded-xl from-pink-400 to-purple-400 bg-gradient-to-br p-4 text-white">
-              <div class="text-2xl font-bold md:text-3xl">
-                {{ timeLeft.seconds }}
-              </div>
-              <div class="text-sm tracking-wide uppercase">
-                Seconds
-              </div>
+            <div class="block w-3/4 border border-gray-300 rounded-lg bg-gray-50 p-4 ps-24 text-2xl text-gray-900 focus:border-blue-500 focus:ring-blue-500">
+              <span class="m-2 block w-20 border rounded-2xl bg-green-400 p-2 text-center font-sans font-bold text-red-600 shadow-md">{{ slot?.winning_no?.toString().padStart(2, '0') }}</span>
             </div>
           </div>
         </div>
-
-        <!-- What's New Section -->
-        <div class="mb-8 border border-yellow-200 rounded-2xl bg-white p-8 shadow-xl">
-          <h3 class="mb-6 text-2xl font-semibold text-gray-800">
-            🎯 What's Coming
-          </h3>
-          <div class="grid gap-6 md:grid-cols-3">
-            <div class="text-center">
-              <div class="mx-auto mb-4 h-16 w-16 flex items-center justify-center rounded-full bg-green-100">
-                <svg class="h-8 w-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                </svg>
-              </div>
-              <h4 class="mb-2 font-semibold text-gray-800">
-                Enhanced Security
-              </h4>
-              <p class="text-gray-600">
-                Firebase authentication for secure access
-              </p>
-            </div>
-            <div class="text-center">
-              <div class="mx-auto mb-4 h-16 w-16 flex items-center justify-center rounded-full bg-blue-100">
-                <svg class="h-8 w-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-              </div>
-              <h4 class="mb-2 font-semibold text-gray-800">
-                Faster Performance
-              </h4>
-              <p class="text-gray-600">
-                Optimized for speed and reliability
-              </p>
-            </div>
-            <div class="text-center">
-              <div class="mx-auto mb-4 h-16 w-16 flex items-center justify-center rounded-full bg-purple-100">
-                <svg class="h-8 w-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                </svg>
-              </div>
-              <h4 class="mb-2 font-semibold text-gray-800">
-                Better Experience
-              </h4>
-              <p class="text-gray-600">
-                Improved user interface and features
-              </p>
-            </div>
+        <div v-if="upcoming" class="relative py-3">
+          <div class="block w-3/4 border border-gray-300 rounded-lg bg-gray-50 p-4 ps-24 text-2xl text-gray-900 focus:border-blue-500 focus:ring-blue-500">
+            <span class="m-2 text-sm">Next result in<br></span><span class="m-2 text-lg">{{ upTime }}</span>
           </div>
-        </div>
-
-        <!-- Contact Info -->
-        <div class="text-lg text-gray-600">
-          <p class="mb-2">
-            Need assistance? We're here to help!
-          </p>
-          <p class="font-semibold text-yellow-600">
-            Thank you for your patience
-          </p>
         </div>
       </div>
-    </main>
-
-    <!-- Footer -->
-    <footer class="bg-gray-800 py-6 text-white">
-      <div class="mx-auto max-w-6xl px-4 text-center">
-        <p class="text-gray-300">
-          © {{ new Date().getFullYear() }} Super Laxmi Lottery. All rights reserved.
-        </p>
-        <p class="mt-2 text-sm text-gray-400">
-          Scheduled maintenance: August 14-18, 2025
-        </p>
+    </div>
+    <div v-else>
+      <div class="mx-5 text-left">
+        {{ date?.toDateString() }}
       </div>
-    </footer>
+      <h2 class="mx-4 mt-6 text-xl">
+        Last day of the Month
+      </h2>
+    </div>
   </div>
 </template>
 
-<style scoped>
-/* Add any custom animations or styles here */
-.fade-in {
-  animation: fadeIn 0.8s ease-in;
+<style>
+.dp-custom-menu {
+  box-shadow: 0 0 6px #1976d2;
+  background-color: rgb(221, 110, 59);
+  font-weight: bold;
 }
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+.calendar{
+  font-style: italic;
 }
 </style>
