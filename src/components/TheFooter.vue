@@ -1,13 +1,12 @@
-<template>
-  <nav sticky bottom-0 mt-6 gap-2 text-xl>
-    <button icon-btn @click="toggleDark()">
-      <div i-carbon-sun dark:i-carbon-moon />
-    </button>
+<script setup>
+// Footer functionality moved to App.vue
+// This component kept for compatibility
+</script>
 
-    &copy; <a
-      icon-btn
-      rel="noreferrer"
-      href="#"
-    >Super Laxmi</a>
-  </nav>
+<template>
+  <!-- This component is now integrated into App.vue footer -->
+  <!-- Keeping this file for compatibility, but content moved to main App layout -->
+  <div class="hidden">
+    <!-- Footer content now in App.vue -->
+  </div>
 </template>

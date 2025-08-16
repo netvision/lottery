@@ -126,6 +126,29 @@ const getDayData = async () => {
   })
 }
 
+// Computed: slot order for admin view
+const orderedSlots = computed(() => {
+  // Find the nearest future slot with no result (pending/awaiting)
+  const now = new Date()
+  let pending = null
+  let minDiff = Infinity
+  const completed = []
+  slots.value.forEach((slot) => {
+    const diff = timeDiff(slot.result_time)
+    if (!slot.winning_no && diff < 0 && Math.abs(diff) < minDiff) {
+      pending = slot
+      minDiff = Math.abs(diff)
+    }
+    else if (slot.winning_no) {
+      completed.push(slot)
+    }
+  })
+  // Sort completed in reverse order (latest first by result_time)
+  completed.sort((a, b) => b.result_time.localeCompare(a.result_time))
+  // Return array: [pending, ...completed]
+  return pending ? [pending, ...completed] : completed
+})
+
 const intervals = ref([])
 
 const schedules = () => {
@@ -165,11 +188,28 @@ onBeforeUnmount(() => {
 
 <template class="min-h-screen">
   <NtpClock />
-  <div class="grid grid-cols-1 min-h-screen bg-gray-50 md:grid-cols-4">
-    <div class="bg-white p-6 shadow-sm md:col-span-1">
-      <div class="mb-6">
-        <h2 class="mb-4 flex items-center text-lg font-semibold text-gray-800">
-          <svg class="mr-2 h-5 w-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+  <div class="min-h-screen bg-gray-50">
+    <!-- Mobile Header -->
+    <div class="bg-white p-4 shadow-sm sm:p-6">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
+        <h1 class="flex items-center text-xl font-bold text-gray-800 sm:text-2xl">
+          <svg class="mr-2 h-5 w-5 text-blue-600 sm:h-6 sm:w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+          </svg>
+          Admin Panel
+        </h1>
+        <div class="text-sm text-gray-600 sm:text-base">
+          {{ date.toDateString() }}
+        </div>
+      </div>
+    </div>
+
+    <!-- Mobile-First Controls Section -->
+    <div class="border-b border-gray-200 bg-white p-4 sm:p-6">
+      <!-- Date Picker Section -->
+      <div class="max-w-md rounded-lg bg-blue-50 p-4">
+        <h2 class="mb-3 flex items-center text-base font-semibold text-gray-800 sm:text-lg">
+          <svg class="mr-2 h-4 w-4 text-blue-600 sm:h-5 sm:w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
           </svg>
           Select Date
@@ -177,7 +217,7 @@ onBeforeUnmount(() => {
         <VueDatePicker
           v-model="date"
           auto-apply
-          inline
+          :inline="false"
           :max-date="new Date()"
           :enable-time-picker="false"
           format="dd-MM-yyyy"
@@ -185,66 +225,37 @@ onBeforeUnmount(() => {
         />
       </div>
 
-      <!-- Quick Stats -->
-      <div class="mt-6 rounded-lg bg-blue-50 p-4">
-        <h3 class="mb-3 text-sm font-medium text-blue-800">
-          Quick Stats
-        </h3>
-        <div class="space-y-2">
-          <div class="flex justify-between text-sm">
-            <span class="text-blue-600">Total Slots:</span>
-            <span class="font-medium text-blue-800">{{ slots.length }}</span>
-          </div>
-          <div class="flex justify-between text-sm">
-            <span class="text-green-600">Editable:</span>
-            <span class="font-medium text-green-700">{{ slots.filter(s => s.canEdit === 'enabled').length }}</span>
-          </div>
-          <div class="flex justify-between text-sm">
-            <span class="text-gray-600">Completed:</span>
-            <span class="font-medium text-gray-700">{{ slots.filter(s => s.winning_no).length }}</span>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="bg-blue-50 p-6 md:col-span-3">
-      <div class="mb-6 rounded-lg bg-white p-6 shadow-sm">
-        <div class="mb-4 flex items-center justify-between">
-          <h1 class="flex items-center text-2xl font-bold text-gray-800">
-            <svg class="mr-2 h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-            </svg>
-            Lottery Results Management
-          </h1>
-          <div class="text-sm text-gray-600">
-            {{ date.toDateString() }}
-          </div>
-        </div>
-
-        <!-- Legend -->
-        <div class="flex flex-wrap gap-4 text-xs">
+      <!-- Mobile Legend -->
+      <div class="mt-4 rounded-lg bg-gray-50 p-3">
+        <div class="grid grid-cols-2 gap-2 text-xs sm:flex sm:flex-wrap sm:gap-4 sm:text-sm">
           <div class="flex items-center">
-            <div class="mr-2 h-3 w-3 animate-pulse rounded-full bg-green-500" />
-            <span class="text-green-700">Editable Now</span>
+            <div class="mr-2 h-2 w-2 animate-pulse rounded-full bg-green-500 sm:h-3 sm:w-3" />
+            <span class="text-green-700">Editable</span>
           </div>
           <div class="flex items-center">
-            <div class="mr-2 h-3 w-3 rounded-full bg-gray-400" />
+            <div class="mr-2 h-2 w-2 rounded-full bg-gray-400 sm:h-3 sm:w-3" />
             <span class="text-gray-600">Locked</span>
           </div>
           <div class="flex items-center">
-            <div class="mr-2 h-3 w-3 rounded-full bg-emerald-500" />
-            <span class="text-emerald-700">Saved Successfully</span>
+            <div class="mr-2 h-2 w-2 rounded-full bg-emerald-500 sm:h-3 sm:w-3" />
+            <span class="text-emerald-700">Saved</span>
           </div>
           <div class="flex items-center">
-            <div class="mr-2 h-3 w-3 rounded-full bg-red-500" />
+            <div class="mr-2 h-2 w-2 rounded-full bg-red-500 sm:h-3 sm:w-3" />
             <span class="text-red-700">Error</span>
           </div>
         </div>
       </div>
+    </div>
 
+    <!-- Mobile-First Results Section -->
+    <div class="p-4 sm:p-6">
       <div class="mb-12">
-        <div v-for="slot in slots" :key="slot.id">
+        <div class="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3 sm:gap-4">
           <div
-            class="relative mb-4 rounded-lg px-4 py-3 transition-all duration-300 hover:shadow-md"
+            v-for="slot in orderedSlots"
+            :key="slot.id"
+            class="relative rounded-lg transition-all duration-300 hover:shadow-lg"
             :class="{
               'bg-green-50 border-2 border-green-200 shadow-sm': slot.canEdit === 'enabled',
               'bg-gray-50 border border-gray-200': slot.canEdit === 'disabled',
@@ -252,87 +263,98 @@ onBeforeUnmount(() => {
               'bg-emerald-50 border-emerald-200': slot.status === 'success',
             }"
           >
-            <!-- Status indicator -->
-            <div
-              class="absolute right-2 top-2 h-3 w-3 rounded-full"
-              :class="{
-                'bg-green-500 animate-pulse': slot.canEdit === 'enabled',
-                'bg-gray-400': slot.canEdit === 'disabled',
-                'bg-red-500': slot.status === 'error',
-                'bg-emerald-500': slot.status === 'success',
-              }"
-            />
+            <!-- Mobile-optimized card layout -->
+            <div class="p-4">
+              <!-- Header with slot info and status -->
+              <div class="mb-3 flex items-center justify-between">
+                <div>
+                  <div
+                    class="text-sm font-bold sm:text-base"
+                    :class="{
+                      'text-green-700': slot.canEdit === 'enabled',
+                      'text-gray-600': slot.canEdit === 'disabled',
+                    }"
+                  >
+                    Slot {{ slot.id }}
+                  </div>
+                  <div
+                    class="text-xs sm:text-sm"
+                    :class="{
+                      'text-green-600': slot.canEdit === 'enabled',
+                      'text-gray-500': slot.canEdit === 'disabled',
+                    }"
+                  >
+                    {{ formatTime(slot.result_time) }}
+                  </div>
+                </div>
 
-            <!-- Slot info with enhanced styling -->
-            <div class="pointer-events-none absolute start-0 inset-y-0 flex items-center ps-3">
-              <div class="text-left">
+                <!-- Status indicator with enhanced mobile visibility -->
                 <div
-                  class="text-sm font-semibold"
+                  class="h-4 w-4 rounded-full sm:h-3 sm:w-3"
                   :class="{
-                    'text-green-700': slot.canEdit === 'enabled',
-                    'text-gray-600': slot.canEdit === 'disabled',
+                    'bg-green-500 animate-pulse': slot.canEdit === 'enabled',
+                    'bg-gray-400': slot.canEdit === 'disabled',
+                    'bg-red-500': slot.status === 'error',
+                    'bg-emerald-500': slot.status === 'success',
                   }"
+                />
+              </div>
+
+              <!-- Status label for mobile -->
+              <div v-if="slot.canEdit === 'enabled'" class="mb-3 inline-flex items-center rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-700 sm:text-sm">
+                ✏️ Editable Now
+              </div>
+
+              <!-- Input/Display Section -->
+              <div v-if="slot.canEdit === 'enabled'">
+                <input
+                  v-model="slot.winning_no"
+                  class="block w-full border-2 border-green-300 rounded-lg bg-white p-3 text-base text-gray-900 transition-all duration-200 focus:border-green-500 sm:p-4 sm:text-sm focus:ring-2 focus:ring-green-200 placeholder-green-400"
+                  placeholder="Enter number (0-99)"
+                  type="number"
+                  min="0"
+                  max="99"
+                  @blur="autoSave(slot)"
+                  @focus="slot.status = ''"
                 >
-                  Slot {{ slot.id }}
+
+                <!-- Mobile-optimized status messages -->
+                <div v-if="slot.status === 'error'" class="mt-2 border border-red-300 rounded-md bg-red-100 p-2">
+                  <p class="flex items-start text-xs text-red-700 sm:text-sm">
+                    <svg class="mr-1 mt-0.5 h-3 w-3 flex-shrink-0 sm:h-4 sm:w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span>{{ slot.message }}</span>
+                  </p>
                 </div>
-                <div
-                  class="text-xs"
-                  :class="{
-                    'text-green-600': slot.canEdit === 'enabled',
-                    'text-gray-500': slot.canEdit === 'disabled',
-                  }"
-                >
-                  {{ formatTime(slot.result_time) }}
-                </div>
-                <div v-if="slot.canEdit === 'enabled'" class="mt-1 text-xs font-medium text-green-600">
-                  ✏️ Editable
+
+                <div v-else-if="slot.status === 'success'" class="mt-2 border border-emerald-300 rounded-md bg-emerald-100 p-2">
+                  <p class="flex items-start text-xs text-emerald-700 sm:text-sm">
+                    <svg class="mr-1 mt-0.5 h-3 w-3 flex-shrink-0 sm:h-4 sm:w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span>{{ slot.message }}</span>
+                  </p>
                 </div>
               </div>
-            </div>
 
-            <!-- Editable input with enhanced styling -->
-            <div v-if="slot.canEdit === 'enabled'">
-              <input
-                v-model="slot.winning_no"
-                class="block w-3/4 border-2 border-green-300 rounded-lg bg-white p-4 ps-24 text-sm text-gray-900 transition-all duration-200 focus:border-green-500 focus:ring-2 focus:ring-green-200 placeholder-green-400"
-                placeholder="Enter winning number (0-99)"
-                @blur="autoSave(slot)"
-                @focus="slot.status = ''"
-              >
-
-              <!-- Enhanced status messages -->
-              <div v-if="slot.status === 'error'" class="mt-2 border border-red-300 rounded-md bg-red-100 p-2">
-                <p class="flex items-center text-sm text-red-700">
-                  <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <span class="font-medium">Error:</span> {{ slot.message }}
-                </p>
-              </div>
-
-              <div v-else-if="slot.status === 'success'" class="mt-2 border border-emerald-300 rounded-md bg-emerald-100 p-2">
-                <p class="flex items-center text-sm text-emerald-700">
-                  <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <span class="font-medium">Success:</span> {{ slot.message }}
-                </p>
-              </div>
-            </div>
-
-            <!-- Read-only display with enhanced styling -->
-            <div v-else>
-              <div class="block w-3/4 border border-gray-300 rounded-lg bg-gray-100 p-4 ps-24 text-sm text-gray-700">
-                <div class="flex items-center justify-between">
-                  <span class="text-lg font-bold">
-                    {{ slot.winning_no?.toString().padStart(2, '0') ?? 'Wait...' }}
-                  </span>
-                  <span v-if="!slot.winning_no" class="animate-pulse text-xs text-gray-500">
-                    Pending result...
-                  </span>
-                  <span v-else class="text-xs text-gray-500">
-                    🔒 Locked
-                  </span>
+              <!-- Read-only display for locked slots -->
+              <div v-else>
+                <div class="flex items-center justify-between border border-gray-300 rounded-lg bg-gray-100 p-3 sm:p-4">
+                  <div class="flex items-center space-x-3">
+                    <span class="text-2xl font-bold text-gray-700 sm:text-3xl">
+                      {{ slot.winning_no?.toString().padStart(2, '0') ?? '--' }}
+                    </span>
+                    <div class="text-xs text-gray-500 sm:text-sm">
+                      <div v-if="!slot.winning_no" class="flex items-center">
+                        <div class="mr-1 h-2 w-2 animate-pulse rounded-full bg-gray-400" />
+                        Pending...
+                      </div>
+                      <div v-else class="flex items-center">
+                        🔒 Final Result
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
