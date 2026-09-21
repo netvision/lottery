@@ -1,29 +1,8 @@
 <!-- eslint-disable vue/html-self-closing -->
 <script setup>
-import { getAuth, onAuthStateChanged } from 'firebase/auth'
-import { useAuthStore } from './stores/authStore'
 import { isDark, toggleDark } from '~/composables'
 import logo from '~/assets/ani-logo.gif'
 import blaast from '~/assets/blaast.gif'
-
-const authStore = useAuthStore()
-const auth = getAuth()
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    authStore.isLoggedIn = true
-    authStore.name = user.displayName
-    authStore.uid = user.uid
-    authStore.email = user.email
-    authStore.photoURL = user.photoURL
-  }
-  else {
-    authStore.isLoggedIn = false
-    authStore.name = ''
-    authStore.uid = ''
-    authStore.email = ''
-    authStore.photoURL = ''
-  }
-})
 </script>
 
 <template class="min-h-screen flex flex-col">

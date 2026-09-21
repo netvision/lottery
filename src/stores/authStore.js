@@ -1,112 +1,46 @@
-/* eslint-disable unused-imports/no-unused-vars */
-/* eslint-disable no-alert */
-
+import axios from 'axios'
 import { defineStore } from 'pinia'
-import { getAuth, signInWithEmailAndPassword, signOut } from 'firebase/auth'
+
+const tokenKey = 'lottery_access_token'
+const usernameKey = 'lottery_admin_username'
+const apiBase = import.meta.env.VITE_API_BASE_URL || 'https://superlaxmi.netserve.in'
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
-    isLoggedIn: false,
-    name: '',
-    email: '',
-    uid: '',
-    photoURL: '',
-    token: null,
-    user: null,
+    token: localStorage.getItem(tokenKey),
+    username: localStorage.getItem(usernameKey) || '',
+    errorMessage: '',
   }),
   getters: {
-    isAuthenticated: state => !!state.user,
+    isLoggedIn: state => Boolean(state.token),
+    isAuthenticated: state => Boolean(state.token),
   },
   actions: {
-    async signIn(email, password) {
-      const auth = getAuth()
+    async signIn(username, password) {
+      this.errorMessage = ''
       try {
-        const result = await signInWithEmailAndPassword(auth, email, password)
-        const user = result.user
-
-        // Get the ID token
-        const token = await user.getIdToken()
-
-        // Update store state
-        this.isLoggedIn = true
-        this.name = user.displayName
-        this.uid = user.uid
-        this.email = user.email
-        this.photoURL = user.photoURL
-        this.token = token
-        this.user = user
-
+        const response = await axios.post(`${apiBase}/auth/login`, { username, password })
+        this.token = response.data.access_token
+        this.username = username
+        localStorage.setItem(tokenKey, this.token)
+        localStorage.setItem(usernameKey, username)
         this.$router.push('/admin')
       }
       catch (error) {
-        const errorCode = error.code
-        this.errorMessage = error.message
-        alert(this.errorMessage)
+        this.errorMessage = error.response?.data?.detail || 'Login failed'
         throw error
       }
     },
-
-    async signout() {
-      const auth = getAuth()
-      try {
-        await signOut(auth)
-
-        // Clear store state
-        this.isLoggedIn = false
-        this.name = ''
-        this.uid = ''
-        this.email = ''
-        this.photoURL = ''
-        this.token = null
-        this.user = null
-
-        alert('logged out')
-        this.$router.push('/')
-      }
-      catch (error) {
-        const errorCode = error.code
-        this.errorMessage = error.message
-        alert(this.errorMessage)
-        throw error
-      }
+    signout() {
+      this.token = null
+      this.username = ''
+      this.errorMessage = ''
+      localStorage.removeItem(tokenKey)
+      localStorage.removeItem(usernameKey)
+      this.$router.push('/login')
     },
-
-    async getToken() {
-      const auth = getAuth()
-      const user = auth.currentUser
-
-      if (user) {
-        try {
-          const token = await user.getIdToken()
-          this.token = token
-          return token
-        }
-        catch (error) {
-          console.error('Error getting token:', error)
-          return null
-        }
-      }
-      return null
-    },
-
-    setUser(user) {
-      if (user) {
-        this.isLoggedIn = true
-        this.name = user.displayName
-        this.uid = user.uid
-        this.email = user.email
-        this.photoURL = user.photoURL
-        this.user = user
-      }
-      else {
-        this.isLoggedIn = false
-        this.name = ''
-        this.uid = ''
-        this.email = ''
-        this.photoURL = ''
-        this.token = null
-        this.user = null
-      }
+    getToken() {
+      return this.token
     },
   },
 })
