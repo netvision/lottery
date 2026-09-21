@@ -115,7 +115,7 @@ const autoSave = (slot) => {
 
 const getDayData = async () => {
   // eslint-disable-next-line prefer-const
-  let dt = `${date.value.getFullYear()}-${date.value.getMonth() + 1}-${date.value.getDate().toString().padStart(2, '0')}`
+  let dt = `${date.value.getFullYear()}-${(date.value.getMonth() + 1).toString().padStart(2, '0')}-${date.value.getDate().toString().padStart(2, '0')}`
   results.value = await axios.get(`https://superlaxmi.netserve.in/results?filter[date][eq]=${dt}`).then(r => r.data)
   console.log(results.value)
   slots.value.map((sl) => {
