@@ -8,11 +8,47 @@ import VueDatePicker from '@vuepic/vue-datepicker'
 import '@vuepic/vue-datepicker/dist/main.css'
 import axios from 'axios'
 import protectedAPI from '~/utils/api'
+import { useAuthStore } from '~/stores/authStore'
 
 const date = ref(new Date())
 
 const results = ref([])
 const slots = ref([])
+const authStore = useAuthStore()
+const currentPassword = ref('')
+const newPassword = ref('')
+const confirmPassword = ref('')
+const passwordMessage = ref('')
+const passwordError = ref('')
+const passwordBusy = ref(false)
+
+const changePassword = async () => {
+  passwordMessage.value = ''
+  passwordError.value = ''
+  if (newPassword.value.length < 12) {
+    passwordError.value = 'New password must be at least 12 characters.'
+    return
+  }
+  if (newPassword.value !== confirmPassword.value) {
+    passwordError.value = 'New passwords do not match.'
+    return
+  }
+  passwordBusy.value = true
+  try {
+    await authStore.changePassword(currentPassword.value, newPassword.value)
+    passwordMessage.value = 'Password changed. Please sign in again.'
+    currentPassword.value = ''
+    newPassword.value = ''
+    confirmPassword.value = ''
+    setTimeout(() => authStore.signout(), 800)
+  }
+  catch (error) {
+    passwordError.value = error.response?.data?.detail || 'Unable to change password.'
+  }
+  finally {
+    passwordBusy.value = false
+  }
+}
 
 const timeArray = () => {
   const startTime = new Date()
@@ -198,10 +234,25 @@ onBeforeUnmount(() => {
           </svg>
           Admin Panel
         </h1>
-        <div class="text-sm text-gray-600 sm:text-base">
-          {{ date.toDateString() }}
-        </div>
+       <div class="text-sm text-gray-600 sm:text-base">
+         {{ date.toDateString() }}
+       </div>
       </div>
+      <form class="mt-4 max-w-xl rounded-lg bg-gray-50 p-4" @submit.prevent="changePassword">
+        <h2 class="mb-3 text-base font-semibold text-gray-800">Change password</h2>
+        <div class="grid gap-2 sm:grid-cols-3">
+          <input v-model="currentPassword" type="password" autocomplete="current-password" required minlength="1" placeholder="Current password" class="rounded border border-gray-300 p-2 text-sm">
+          <input v-model="newPassword" type="password" autocomplete="new-password" required minlength="12" placeholder="New password" class="rounded border border-gray-300 p-2 text-sm">
+          <input v-model="confirmPassword" type="password" autocomplete="new-password" required minlength="12" placeholder="Confirm new password" class="rounded border border-gray-300 p-2 text-sm">
+        </div>
+        <div class="mt-2 flex items-center gap-3">
+          <button type="submit" :disabled="passwordBusy" class="rounded bg-blue-600 px-3 py-2 text-sm text-white disabled:opacity-50">
+            {{ passwordBusy ? 'Changing...' : 'Change password' }}
+          </button>
+          <span v-if="passwordMessage" class="text-sm text-green-700">{{ passwordMessage }}</span>
+          <span v-if="passwordError" class="text-sm text-red-700">{{ passwordError }}</span>
+        </div>
+      </form>
     </div>
 
     <!-- Mobile-First Controls Section -->

@@ -42,5 +42,14 @@ export const useAuthStore = defineStore('auth', {
     getToken() {
       return this.token
     },
+    async changePassword(currentPassword, newPassword) {
+      const response = await axios.post(`${apiBase}/auth/change-password`, {
+        current_password: currentPassword,
+        new_password: newPassword,
+      }, {
+        headers: { Authorization: `Bearer ${this.token}` },
+      })
+      return response
+    },
   },
 })
